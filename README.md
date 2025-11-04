@@ -1,51 +1,49 @@
-CalculadoraRapida
+# CalculadoraRapida
 
-Este projeto consiste em uma calculadora web simples e eficiente, desenvolvida em HTML e estilizada com Tailwind CSS (Dark Mode), projetada especificamente para empreendedores que utilizam o modelo de vendas de caixas surpresa (loot boxes) ou kits de produtos de valor variável a um preço fixo.
+Este projeto consiste em uma **calculadora web simples e eficiente**, desenvolvida em **HTML** e estilizada com **Tailwind CSS (Dark Mode)**, projetada especialmente para **empreendedores que trabalham com caixas surpresa (loot boxes)** ou **kits de produtos de valor variável a um preço fixo**.
 
-Descrição do Projeto
+---
 
-O objetivo principal é determinar um preço de venda médio que garanta a cobertura dos custos de todo o inventário e a obtenção de uma margem de lucro predefinida.
+## 📌 Descrição do Projeto
 
-Como Funciona
+O objetivo principal é **determinar um preço de venda médio** que garanta:
 
-A ferramenta aplica o princípio do Custo Médio. Em vez de precificar individualmente cada caixa (o que é impossível em um modelo surpresa), ela considera o custo total de todo o estoque e o distribui igualmente entre o número total de caixas.
+✔ A cobertura de todos os custos do inventário  
+✔ A obtenção de uma **margem de lucro predefinida**
 
-Cálculo do Custo Médio por Caixa: Custo Total do Inventário / Número Total de Caixas (Este é o valor de break-even).
+---
 
-Cálculo do Preço Sugerido: O Custo Médio é ajustado para cima com base na Margem de Lucro Desejada (%).
+## ⚙️ Como Funciona
 
-Funcionalidades e Entradas Essenciais
+A calculadora utiliza o conceito de **Custo Médio**, distribuindo o custo total do estoque entre todas as caixas, já que neste modelo não é possível precificar cada caixa individualmente.
 
-A calculadora requer apenas três entradas para gerar todos os resultados financeiros:
+### 📐 Fórmulas Aplicadas
 
-Campo
+- **Custo Médio por Caixa (Break-even):**  
+  `Custo Total do Inventário ÷ Número Total de Caixas`
 
-Descrição
+- **Preço de Venda Sugerido:**  
+  `Custo Médio por Caixa + Margem de Lucro (%)`
 
-Custo Total de Todos os Produtos (R$)
+---
 
-A soma do valor de compra de todo o estoque que será dividido nas caixas.
+## 🧾 Entradas Necessárias
 
-Número Total de Caixas a Vender
+A ferramenta precisa de apenas **três campos** para realizar os cálculos:
 
-O número total de unidades de caixas que serão preparadas.
+| Campo | Descrição |
+|-------|-----------|
+| **Custo Total de Todos os Produtos (R$)** | Soma do valor de compra de todo o estoque (incluindo embalagem, frete, etc.) |
+| **Número Total de Caixas a Vender** | Quantidade total de caixas que serão montadas |
+| **Margem de Lucro Desejada (%)** | Percentual de lucro aplicado sobre o custo médio |
 
-Margem de Lucro Desejada (%)
+---
 
-O percentual de lucro que se deseja obter sobre o custo médio de cada caixa.
+## 📊 Resultados Gerados
 
-Resultados Fornecidos
+A aplicação exibe automaticamente os seguintes valores:
 
-A aplicação exibe quatro métricas financeiras cruciais:
-
-Custo Médio por Caixa: O valor mínimo para cobrir os custos (ponto de equilíbrio).
-
-Preço de Venda Sugerido: O preço que inclui a margem de lucro desejada.
-
-Lucro Total Estimado: O lucro bruto total se todas as caixas forem vendidas pelo preço sugerido.
-
-Valor Total Estimado de Venda (Faturamento): A receita total gerada pela venda de todas as caixas.
-
-⚠️ ALERTA DE CUSTOS: É fundamental que os custos de embalagem, manuseio e envio sejam sempre considerados e incluídos no "Custo Total de Todos os Produtos" para que o cálculo seja preciso.
-
-Desenvolvido por Ranieu Sousa
+- **Custo Médio por Caixa:** valor mínimo para cobrir os custos (ponto de equilíbrio)  
+- **Preço de Venda Sugerido:** valor de venda com a margem de lucro aplicada  
+- **Lucro Total Estimado:** lucro bruto caso todas as caixas sejam vendidas  
+- **Valor Total Estimado de Ven**
