@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Custo Médio por Caixa (Simplificada)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Estilos base para Dark Mode */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #111827; /* Fundo Escuro Principal (gray-900) */
+            color: #d1d5db; /* Cor do texto padrão (gray-300) */
+        }
+        .card {
+            background-color: #1f2937; /* Fundo de Card Escuro (gray-800) */
+            border-radius: 1rem;
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.3); /* Sombra mais escura */
+        }
+        input[type="number"] {
+            transition: all 0.2s;
+            background-color: #0d121c; /* Fundo do input mais escuro que o card */
+            color: #f3f4f6; /* Cor do texto no input */
+        }
+        input:focus {
+            border-color: #3b82f6; /* Foco azul */
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.4);
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-4xl font-extrabold text-white mb-6 text-center">
+            Calculadora Rápida de Preço por Caixa
+        </h1>
+        <p class="text-gray-400 mb-8 text-center">
+            Insira o custo total do seu estoque e calcule rapidamente o preço de venda médio para garantir seu lucro.
+        </p>
+
+        <!-- SEÇÃO DE DESCRIÇÃO -->
+        <div class="mb-8 p-4 border-l-4 border-blue-500 bg-gray-800 rounded-lg shadow-inner">
+            <h3 class="text-xl font-bold text-blue-400 mb-2">Como Funciona:</h3>
+            <p class="text-gray-300 text-sm leading-relaxed">
+                Esta calculadora utiliza o conceito de **Custo Médio** para precificar suas caixas surpresa. Ela divide o **Custo Total de Todos os Produtos** pelo **Número Total de Caixas** para encontrar o valor mínimo que você deve cobrar. Em seguida, aplica a **Margem de Lucro Desejada** para sugerir um preço de venda que garante que você cubra o custo do seu inventário e obtenha o faturamento esperado. Os resultados mostram o ponto de equilíbrio ('break-even'), o lucro e o faturamento total.
+            </p>
+        </div>
+        <!-- FIM DA SEÇÃO DE DESCRIÇÃO -->
+
+        <!-- ALERTA DE CUSTOS (EM VERMELHO E NO TOPO) -->
+        <div class="mb-10 p-4 border-l-4 border-red-500 bg-red-900/50 rounded-lg shadow-inner">
+            <p class="text-sm font-semibold text-red-300 leading-relaxed text-center">
+                ⚠️ ALERTA DE CUSTOS: Os custos de embalagem e envio devem ser considerados no seu cálculo de lucro ou incluídos no Custo Total de Todos os Produtos.
+            </p>
+        </div>
+        <!-- FIM DO ALERTA DE CUSTOS -->
+
+        <!-- Seção de Parâmetros Globais - Entradas Simplificadas -->
+        <div class="card p-6 mb-8 bg-gray-800 border border-blue-700">
+            <h2 class="text-2xl font-bold text-blue-400 mb-4 border-b border-blue-800 pb-2">Entradas Essenciais</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                
+                <!-- Custo Total do Inventário -->
+                <div>
+                    <label for="custoTotalInventario" class="block text-sm font-bold text-gray-300">1. Custo Total de Todos os Produtos (R$)</label>
+                    <input type="number" id="custoTotalInventario" value="2000" min="0.01" step="0.01" oninput="calcularTotal()" class="mt-1 block w-full rounded-lg border-blue-600 focus:border-blue-400 shadow-lg p-3 border text-lg font-semibold">
+                    <p class="text-xs text-gray-400 mt-1">Soma do valor de compra de *todo* o seu estoque.</p>
+                </div>
+
+                <!-- Número Total de Caixas -->
+                <div>
+                    <label for="numCaixas" class="block text-sm font-bold text-gray-300">2. Número Total de Caixas a Vender</label>
+                    <input type="number" id="numCaixas" value="100" min="1" oninput="calcularTotal()" class="mt-1 block w-full rounded-lg border-blue-600 focus:border-blue-400 shadow-lg p-3 border text-lg font-semibold">
+                    <p class="text-xs text-gray-400 mt-1">Total de caixas que serão preparadas.</p>
+                </div>
+                
+                <!-- Margem de Lucro -->
+                <div>
+                    <label for="margemLucro" class="block text-sm font-bold text-gray-300">3. Margem de Lucro Desejada (%)</label>
+                    <input type="number" id="margemLucro" value="20" min="0" oninput="calcularTotal()" class="mt-1 block w-full rounded-lg border-blue-600 focus:border-blue-400 shadow-lg p-3 border text-lg font-semibold">
+                    <p class="text-xs text-gray-400 mt-1">Percentual de lucro que você quer ter.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Seção de Resultados -->
+        <div class="card p-6 bg-gray-800">
+            <h2 class="text-2xl font-bold text-green-400 mb-4 border-b border-green-700 pb-2">Resultados Chave</h2>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+
+                <!-- Custo Médio por Caixa -->
+                <div class="p-4 bg-gray-900 rounded-lg border border-green-700 shadow-md">
+                    <p class="text-sm font-medium text-gray-400">Custo Médio por Caixa</p>
+                    <p id="custoMedio" class="text-2xl md:text-3xl font-extrabold text-green-400 mt-1">R$ 0,00</p>
+                    <p class="text-xs text-gray-500 mt-1">Valor de **break-even** (zero prejuízo).</p>
+                </div>
+                
+                <!-- Preço de Venda Sugerido -->
+                <div class="p-4 bg-gray-900 rounded-lg border border-green-700 shadow-md">
+                    <p class="text-sm font-medium text-gray-400">Preço de Venda Sugerido</p>
+                    <p id="precoSugerido" class="text-2xl md:text-3xl font-extrabold text-indigo-400 mt-1">R$ 0,00</p>
+                    <p class="text-xs text-gray-500 mt-1">Com margem de lucro de <span id="margemExibida" class="font-bold">20</span>%.</p>
+                </div>
+                
+                <!-- Lucro Total Estimado -->
+                <div class="p-4 bg-gray-900 rounded-lg border border-green-700 shadow-md">
+                    <p class="text-sm font-medium text-gray-400">Lucro Total Estimado</p>
+                    <p id="lucroEstimado" class="text-2xl md:text-3xl font-extrabold text-yellow-400 mt-1">R$ 0,00</p>
+                    <p class="text-xs text-gray-500 mt-1">Se todas as caixas forem vendidas.</p>
+                </div>
+
+                <!-- Valor Total Estimado de Venda (Faturamento) -->
+                <div class="p-4 bg-gray-900 rounded-lg border border-green-700 shadow-md">
+                    <p class="text-sm font-medium text-gray-400">Valor Total Estimado de Venda</p>
+                    <p id="valorTotalVendido" class="text-2xl md:text-3xl font-extrabold text-blue-400 mt-1">R$ 0,00</p>
+                    <p class="text-xs text-gray-500 mt-1">Receita total da venda das <span id="caixasExibidas" class="font-bold">100</span> caixas.</p>
+                </div>
+
+            </div>
+        </div>
+        
+        <!-- O antigo rodapé de alerta foi removido daqui. -->
+        
+        <!-- Rodapé de Autoria -->
+        <footer class="mt-12">
+            <p class="text-center text-sm text-gray-500">Desenvolvido por Ranieu Sousa</p>
+        </footer>
+
+    </div>
+
+    <script>
+        // Função para formatar números para a moeda BRL (R$)
+        const formatarMoeda = (valor) => {
+            // Garante que o valor é um número finito, senão retorna 0
+            if (!isFinite(valor) || isNaN(valor)) {
+                valor = 0;
+            }
+            return new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL',
+            }).format(valor);
+        };
+
+        // Função principal de cálculo (simplificada)
+        const calcularTotal = () => {
+            // 1. Obter Entradas
+            const numCaixas = parseFloat(document.getElementById('numCaixas').value) || 0;
+            const custoTotalInventario = parseFloat(document.getElementById('custoTotalInventario').value) || 0;
+            const margemLucro = parseFloat(document.getElementById('margemLucro').value) || 0;
+
+            // 2. Calcular Custo Médio por Caixa
+            let custoMedioCaixa = 0;
+            if (numCaixas > 0 && custoTotalInventario > 0) {
+                custoMedioCaixa = custoTotalInventario / numCaixas;
+            }
+
+            // 3. Calcular Preço de Venda Sugerido
+            const fatorLucro = 1 + (margemLucro / 100);
+            const precoVendaSugerido = custoMedioCaixa * fatorLucro;
+            
+            // 4. Calcular Valor Total Estimado de Venda (Faturamento)
+            const valorTotalVendido = precoVendaSugerido * numCaixas;
+            
+            // 5. Calcular Lucro Total Estimado
+            const lucroEstimado = valorTotalVendido - custoTotalInventario;
+
+
+            // 6. Exibir Resultados
+            document.getElementById('custoMedio').textContent = formatarMoeda(custoMedioCaixa);
+            document.getElementById('precoSugerido').textContent = formatarMoeda(precoVendaSugerido);
+            document.getElementById('valorTotalVendido').textContent = formatarMoeda(valorTotalVendido);
+            document.getElementById('lucroEstimado').textContent = formatarMoeda(lucroEstimado);
+
+            // 7. Atualizar Margem e Caixas Exibidas
+            document.getElementById('margemExibida').textContent = margemLucro.toFixed(0);
+            document.getElementById('caixasExibidas').textContent = numCaixas.toFixed(0);
+        };
+
+        // Inicializar a aplicação ao carregar a página
+        window.onload = calcularTotal;
+
+    </script>
+</body>
+</html>
