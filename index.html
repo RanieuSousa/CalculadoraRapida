@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html lang="pt">
 <head>
-    
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculadora de Custo Médio por Caixa (Simplificada)</title>
+    <title>Calculadora de Custo e Gestor de Inventário</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
@@ -19,7 +18,7 @@
             border-radius: 1rem;
             box-shadow: 0 10px 15px rgba(0, 0, 0, 0.3); /* Sombra mais escura */
         }
-        input[type="number"] {
+        input[type="number"], input[type="text"] {
             transition: all 0.2s;
             background-color: #0d121c; /* Fundo do input mais escuro que o card */
             color: #f3f4f6; /* Cor do texto no input */
@@ -28,102 +27,312 @@
             border-color: #3b82f6; /* Foco azul */
             box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.4);
         }
+        
+        /* Estilos das Abas */
+        .tab-button {
+            transition: all 0.2s;
+            padding: 0.75rem 1rem;
+            font-weight: 600;
+            border-bottom: 3px solid transparent;
+            color: #6b7280; /* Cor inativa (gray-500) */
+            cursor: pointer;
+        }
+        .tab-button:hover {
+            color: #d1d5db; /* Cor hover (gray-300) */
+        }
+        .tab-button.active {
+            color: #3b82f6; /* Cor ativa (blue-500) */
+            border-bottom-color: #3b82f6;
+        }
+        .tab-content {
+            display: none; /* Escondido por padrão */
+        }
+        .tab-content.active {
+            display: block; /* Mostra o conteúdo ativo */
+        }
+
+        /* Estilos da Tabela de Inventário */
+        table {
+            width: 100%;
+        }
+        th {
+            background-color: #374151; /* gray-700 */
+            padding: 0.75rem;
+            text-align: left;
+            font-size: 0.875rem;
+            color: #d1d5db; /* gray-300 */
+            text-transform: uppercase;
+        }
+        td {
+            padding: 0.75rem;
+            border-bottom: 1px solid #374151; /* gray-700 */
+        }
+        td input {
+            padding: 0.5rem;
+            border-radius: 0.375rem;
+            border: 1px solid #4b5563; /* gray-600 */
+            width: 100%;
+        }
+        /* Ajuste para não quebrar em telas pequenas */
+        .table-container {
+            overflow-x: auto;
+        }
+        
     </style>
 </head>
 <body class="p-4 md:p-8">
 
     <div class="max-w-4xl mx-auto">
         <h1 class="text-4xl font-extrabold text-white mb-6 text-center">
-            Calculadora Rápida de Preço por Caixa
+            Calculadora e Gestor de Inventário
         </h1>
-        <p class="text-gray-400 mb-8 text-center">
-            Insira o custo total do seu estoque e calcule rapidamente o preço de venda médio para garantir seu lucro.
-        </p>
-
-        <!-- SEÇÃO DE DESCRIÇÃO -->
-        <div class="mb-8 p-4 border-l-4 border-blue-500 bg-gray-800 rounded-lg shadow-inner">
-            <h3 class="text-xl font-bold text-blue-400 mb-2">Como Funciona:</h3>
-            <p class="text-gray-300 text-sm leading-relaxed">
-                Esta calculadora utiliza o conceito de **Custo Médio** para precificar suas caixas surpresa. Ela divide o **Custo Total de Todos os Produtos** pelo **Número Total de Caixas** para encontrar o valor mínimo que você deve cobrar. Em seguida, aplica a **Margem de Lucro Desejada** para sugerir um preço de venda que garante que você cubra o custo do seu inventário e obtenha o faturamento esperado. Os resultados mostram o ponto de equilíbrio ('break-even'), o lucro e o faturamento total.
-            </p>
+        
+        <!-- Controles das Abas -->
+        <div class="mb-8 border-b border-gray-700 flex justify-center">
+            <button id="tab-btn-1" class="tab-button active" onclick="changeTab(1)">Calculadora Rápida</button>
+            <button id="tab-btn-2" class="tab-button" onclick="changeTab(2)">Gestor de Inventário</button>
+            <button id="tab-btn-3" class="tab-button" onclick="changeTab(3)">Precificar Produto</button>
         </div>
-        <!-- FIM DA SEÇÃO DE DESCRIÇÃO -->
 
-        <!-- ALERTA DE CUSTOS (EM VERMELHO E NO TOPO) -->
-        <div class="mb-10 p-4 border-l-4 border-red-500 bg-red-900/50 rounded-lg shadow-inner">
-            <p class="text-sm font-semibold text-red-300 leading-relaxed text-center">
-                ⚠️ ALERTA DE CUSTOS: Os custos de embalagem e envio devem ser considerados no seu cálculo de lucro ou incluídos no Custo Total de Todos os Produtos.
+        <!-- Conteúdo da Aba 1: Calculadora Rápida -->
+        <div id="tab-content-1" class="tab-content active">
+            <p class="text-gray-400 mb-8 text-center">
+                Insira o custo total do seu estoque e calcule rapidamente o preço de venda médio para garantir seu lucro.
             </p>
-        </div>
-        <!-- FIM DO ALERTA DE CUSTOS -->
 
-        <!-- Seção de Parâmetros Globais - Entradas Simplificadas -->
-        <div class="card p-6 mb-8 bg-gray-800 border border-blue-700">
-            <h2 class="text-2xl font-bold text-blue-400 mb-4 border-b border-blue-800 pb-2">Entradas Essenciais</h2>
+            <!-- SEÇÃO DE DESCRIÇÃO -->
+            <div class="mb-8 p-4 border-l-4 border-blue-500 bg-gray-800 rounded-lg shadow-inner">
+                <h3 class="text-xl font-bold text-blue-400 mb-2">Como Funciona:</h3>
+                <p class="text-gray-300 text-sm leading-relaxed">
+                    Esta calculadora utiliza o conceito de **Custo Médio** para precificar suas caixas surpresa. Ela divide o **Custo Total de Todos os Produtos** pelo **Número Total de Caixas** para encontrar o valor mínimo que você deve cobrar. Em seguida, aplica a **Margem de Lucro Desejada** para sugerir um preço de venda.
+                </p>
+            </div>
+            <!-- FIM DA SEÇÃO DE DESCRIÇÃO -->
             
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                
-                <!-- Custo Total do Inventário -->
-                <div>
-                    <label for="custoTotalInventario" class="block text-sm font-bold text-gray-300">1. Custo Total de Todos os Produtos (R$)</label>
-                    <input type="number" id="custoTotalInventario" value="2000" min="0.01" step="0.01" oninput="calcularTotal()" class="mt-1 block w-full rounded-lg border-blue-600 focus:border-blue-400 shadow-lg p-3 border text-lg font-semibold">
-                    <p class="text-xs text-gray-400 mt-1">Soma do valor de compra de *todo* o seu estoque.</p>
-                </div>
+            <!-- ALERTA DE CUSTOS (EM VERMELHO E NO TOPO) -->
+            <div class="mb-10 p-4 border-l-4 border-red-500 bg-red-900/50 rounded-lg shadow-inner">
+                <p class="text-sm font-semibold text-red-300 leading-relaxed text-center">
+                    ⚠️ ALERTA DE CUSTOS: Os custos de embalagem e envio devem ser considerados no seu cálculo de lucro ou incluídos no Custo Total de Todos os Produtos.
+                </p>
+            </div>
+            <!-- FIM DO ALERTA DE CUSTOS -->
 
-                <!-- Número Total de Caixas -->
-                <div>
-                    <label for="numCaixas" class="block text-sm font-bold text-gray-300">2. Número Total de Caixas a Vender</label>
-                    <input type="number" id="numCaixas" value="100" min="1" oninput="calcularTotal()" class="mt-1 block w-full rounded-lg border-blue-600 focus:border-blue-400 shadow-lg p-3 border text-lg font-semibold">
-                    <p class="text-xs text-gray-400 mt-1">Total de caixas que serão preparadas.</p>
+            <!-- Seção de Parâmetros Globais - Entradas Simplificadas -->
+            <div class="card p-6 mb-8 bg-gray-800 border border-blue-700">
+                <h2 class="text-2xl font-bold text-blue-400 mb-4 border-b border-blue-800 pb-2">Entradas Essenciais</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    
+                    <!-- Custo Total do Inventário -->
+                    <div>
+                        <label for="custoTotalInventario" class="block text-sm font-bold text-gray-300">1. Custo Total de Todos os Produtos (R$)</label>
+                        <input type="number" id="custoTotalInventario" value="2000" min="0.01" step="0.01" oninput="calcularTotal()" class="mt-1 block w-full rounded-lg border-blue-600 focus:border-blue-400 shadow-lg p-3 border text-lg font-semibold">
+                        <p class="text-xs text-gray-400 mt-1">Soma do valor de compra de *todo* o seu estoque.</p>
+                    </div>
+
+                    <!-- Número Total de Caixas -->
+                    <div>
+                        <label for="numCaixas" class="block text-sm font-bold text-gray-300">2. Número Total de Caixas a Vender</label>
+                        <input type="number" id="numCaixas" value="100" min="1" oninput="calcularTotal(); syncCaixas(this.value);" class="mt-1 block w-full rounded-lg border-blue-600 focus:border-blue-400 shadow-lg p-3 border text-lg font-semibold">
+                        <p class="text-xs text-gray-400 mt-1">Total de caixas que serão preparadas.</p>
+                    </div>
+                    
+                    <!-- Margem de Lucro -->
+                    <div>
+                        <label for="margemLucro" class="block text-sm font-bold text-gray-300">3. Margem de Lucro Desejada (%)</label>
+                        <input type="number" id="margemLucro" value="20" min="0" oninput="calcularTotal()" class="mt-1 block w-full rounded-lg border-blue-600 focus:border-blue-400 shadow-lg p-3 border text-lg font-semibold">
+                        <p class="text-xs text-gray-400 mt-1">Percentual de lucro que você quer ter.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Seção de Resultados -->
+            <div class="card p-6 bg-gray-800">
+                <h2 class="text-2xl font-bold text-green-400 mb-4 border-b border-green-700 pb-2">Resultados Chave</h2>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+
+                    <!-- Custo Médio por Caixa -->
+                    <div class="p-4 bg-gray-900 rounded-lg border border-green-700 shadow-md">
+                        <p class="text-sm font-medium text-gray-400">Custo Médio por Caixa</p>
+                        <p id="custoMedio" class="text-2xl md:text-3xl font-extrabold text-green-400 mt-1">R$ 0,00</p>
+                        <p class="text-xs text-gray-500 mt-1">Valor de **break-even** (zero prejuízo).</p>
+                    </div>
+                    
+                    <!-- Preço de Venda Sugerido -->
+                    <div class="p-4 bg-gray-900 rounded-lg border border-green-700 shadow-md">
+                        <p class="text-sm font-medium text-gray-400">Preço de Venda Sugerido</p>
+                        <p id="precoSugerido" class="text-2xl md:text-3xl font-extrabold text-indigo-400 mt-1">R$ 0,00</p>
+                        <p class="text-xs text-gray-500 mt-1">Com margem de lucro de <span id="margemExibida" class="font-bold">20</span>%.</p>
+                    </div>
+                    
+                    <!-- Lucro Total Estimado -->
+                    <div class="p-4 bg-gray-900 rounded-lg border border-green-700 shadow-md">
+                        <p class="text-sm font-medium text-gray-400">Lucro Total Estimado</p>
+                        <p id="lucroEstimado" class="text-2xl md:text-3xl font-extrabold text-yellow-400 mt-1">R$ 0,00</p>
+                        <p class="text-xs text-gray-500 mt-1">Se todas as caixas forem vendidas.</p>
+                    </div>
+
+                    <!-- Valor Total Estimado de Venda (Faturamento) -->
+                    <div class="p-4 bg-gray-900 rounded-lg border border-green-700 shadow-md">
+                        <p class="text-sm font-medium text-gray-400">Valor Total Estimado de Venda</p>
+                        <p id="valorTotalVendido" class="text-2xl md:text-3xl font-extrabold text-blue-400 mt-1">R$ 0,00</p>
+                        <p class="text-xs text-gray-500 mt-1">Receita total da venda das <span id="caixasExibidas" class="font-bold">100</span> caixas.</p>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        
+        <!-- Conteúdo da Aba 2: Gestor de Inventário -->
+        <div id="tab-content-2" class="tab-content">
+            <p class="text-gray-400 mb-8 text-center">
+                Cadastre seus produtos para calcular o custo total do inventário e planejar a distribuição nas caixas.
+            </p>
+
+            <!-- Seção de Cadastro de Produtos -->
+            <div class="card p-6 mb-8 bg-gray-800 border border-blue-700">
+                <h2 class="text-2xl font-bold text-blue-400 mb-4 border-b border-blue-800 pb-2">Produtos no Inventário</h2>
+                
+                <div class="table-container mb-4">
+                    <table id="tabela-inventario">
+                        <thead>
+                            <tr>
+                                <th class="w-2/5">Produto</th>
+                                <th class="w-1/5">Quantidade</th>
+                                <th class="w-1/5">Valor Unit. (R$)</th>
+                                <th class="w-1/5">Valor Total (R$)</th>
+                                <th></th> <!-- Coluna para botão de remover -->
+                            </tr>
+                        </thead>
+                        <tbody id="inventory-list">
+                            <!-- Linhas de produtos serão adicionadas aqui via JS -->
+                        </tbody>
+                    </table>
                 </div>
                 
-                <!-- Margem de Lucro -->
-                <div>
-                    <label for="margemLucro" class="block text-sm font-bold text-gray-300">3. Margem de Lucro Desejada (%)</label>
-                    <input type="number" id="margemLucro" value="20" min="0" oninput="calcularTotal()" class="mt-1 block w-full rounded-lg border-blue-600 focus:border-blue-400 shadow-lg p-3 border text-lg font-semibold">
-                    <p class="text-xs text-gray-400 mt-1">Percentual de lucro que você quer ter.</p>
+                <button onclick="adicionarProduto()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200">
+                    + Adicionar Produto
+                </button>
+            </div>
+            
+            <!-- Seção de Resumo do Inventário -->
+            <div class="card p-6 mb-8 bg-gray-800">
+                <h2 class="text-2xl font-bold text-green-400 mb-4 border-b border-green-700 pb-2">Resumo do Inventário</h2>
+                
+                <div class="flex flex-col md:flex-row justify-between items-center">
+                    <div>
+                        <p class="text-sm font-medium text-gray-400">Custo Total do Inventário</p>
+                        <p id="inventario-custo-total" class="text-3xl font-extrabold text-green-400 mt-1">R$ 0,00</p>
+                    </div>
+                    <button onclick="sincronizarCusto()" class="mt-4 md:mt-0 w-full md:w-auto bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200">
+                        Usar este Custo na Calculadora
+                    </button>
+                </div>
+            </div>
+
+            <!-- Seção de Distribuição -->
+            <div class="card p-6 bg-gray-800 border border-yellow-700">
+                <h2 class="text-2xl font-bold text-yellow-400 mb-4 border-b border-yellow-800 pb-2">Distribuição de Itens por Caixa</h2>
+                
+                <!-- O input de número de caixas foi removido, conforme solicitado -->
+                
+                <button onclick="gerarDistribuicao()" class="w-full bg-yellow-600 hover:bg-yellow-700 text-black font-bold py-2 px-4 rounded-lg transition duration-200">
+                    Gerar Plano de Distribuição
+                </button>
+                
+                <div id="distribuicao-resultado" class="mt-6 hidden">
+                    <h3 class="text-xl font-bold text-white mb-2">Resultado da Distribuição:</h3>
+                    <p class="text-gray-400 mb-4">Com base em <strong id="dist-num-caixas" class="text-yellow-400">100</strong> caixas (definidas na Aba 1), este é o plano de distribuição de itens:</p>
+                    <ul id="dist-lista-produtos" class="list-disc list-inside space-y-2 text-gray-300">
+                        <!-- Resultados da distribuição aqui -->
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+        
+        <!-- Conteúdo da Aba 2: Gestor de Inventário -->
+        <div id="tab-content-2" class="tab-content">
+            <p class="text-gray-400 mb-8 text-center">
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Conteúdo da Aba 3: Precificar Produto Individual -->
+        <div id="tab-content-3" class="tab-content">
+            <p class="text-gray-400 mb-8 text-center">
+                Calcule o preço de venda de um item com base em seus custos e margem de lucro desejada.
+            </p>
+
+            <!-- Seção de Custos do Produto -->
+            <div class="card p-6 mb-8 bg-gray-800 border border-purple-700">
+                <h2 class="text-2xl font-bold text-purple-400 mb-4 border-b border-purple-800 pb-2">1. Custos do Produto</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    
+                    <!-- Custo de Compra -->
+                    <div>
+                        <label for="custoProduto" class="block text-sm font-bold text-gray-300">Custo de Compra (R$)</label>
+                        <input type="number" id="custoProduto" value="50" min="0" step="0.01" oninput="calcularPrecoVenda()" class="mt-1 block w-full rounded-lg border-purple-600 focus:border-purple-400 shadow-lg p-3 border text-lg font-semibold">
+                    </div>
+
+                    <!-- Frete -->
+                    <div>
+                        <label for="custoFrete" class="block text-sm font-bold text-gray-300">Frete (R$)</label>
+                        <input type="number" id="custoFrete" value="10" min="0" step="0.01" oninput="calcularPrecoVenda()" class="mt-1 block w-full rounded-lg border-purple-600 focus:border-purple-400 shadow-lg p-3 border text-lg font-semibold">
+                    </div>
+                    
+                    <!-- Impostos/Taxas -->
+                    <div>
+                        <label for="custoImpostos" class="block text-sm font-bold text-gray-300">Impostos/Taxas (R$)</label>
+                        <input type="number" id="custoImpostos" value="5" min="0" step="0.01" oninput="calcularPrecoVenda()" class="mt-1 block w-full rounded-lg border-purple-600 focus:border-purple-400 shadow-lg p-3 border text-lg font-semibold">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Seção de Margem de Lucro -->
+            <div class="card p-6 mb-8 bg-gray-800 border border-green-700">
+                <h2 class="text-2xl font-bold text-green-400 mb-4 border-b border-green-800 pb-2">2. Margem de Lucro</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Custo Total -->
+                    <div class="p-4 bg-gray-900 rounded-lg border border-gray-700">
+                        <p class="text-sm font-medium text-gray-400">Custo Total do Produto</p>
+                        <p id="resultadoCustoTotal" class="text-2xl font-extrabold text-white mt-1">R$ 0,00</p>
+                        <p class="text-xs text-gray-500 mt-1">(Compra + Frete + Impostos)</p>
+                    </div>
+
+                    <!-- Margem de Lucro % -->
+                    <div>
+                        <label for="margemLucroProduto" class="block text-sm font-bold text-gray-300">Margem de Lucro Desejada (%)</label>
+                        <input type="number" id="margemLucroProduto" value="40" min="0" max="99" step="1" oninput="calcularPrecoVenda()" class="mt-1 block w-full rounded-lg border-green-600 focus:border-green-400 shadow-lg p-3 border text-lg font-semibold">
+                        <p class="text-xs text-gray-400 mt-1">Percentual do *preço de venda* que será lucro.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Seção de Resultado do Preço -->
+            <div class="card p-6 bg-gray-800">
+                <h2 class="text-2xl font-bold text-blue-400 mb-4 border-b border-blue-700 pb-2">3. Preço de Venda Sugerido</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                    <!-- Lucro Bruto (R$) -->
+                    <div class="p-4 bg-gray-900 rounded-lg border border-blue-700 shadow-md">
+                        <p class="text-sm font-medium text-gray-400">Lucro Bruto (R$)</p>
+                        <p id="resultadoValorLucro" class="text-2xl md:text-3xl font-extrabold text-yellow-400 mt-1">R$ 0,00</p>
+                    </div>
+                    
+                    <!-- Preço de Venda Final -->
+                    <div class="p-4 bg-gray-900 rounded-lg border border-blue-700 shadow-md">
+                        <p class="text-sm font-medium text-gray-400">Preço de Venda Final (R$)</p>
+                        <p id="resultadoPrecoVenda" class="text-2xl md:text-3xl font-extrabold text-blue-400 mt-1">R$ 0,00</p>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Seção de Resultados -->
-        <div class="card p-6 bg-gray-800">
-            <h2 class="text-2xl font-bold text-green-400 mb-4 border-b border-green-700 pb-2">Resultados Chave</h2>
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-
-                <!-- Custo Médio por Caixa -->
-                <div class="p-4 bg-gray-900 rounded-lg border border-green-700 shadow-md">
-                    <p class="text-sm font-medium text-gray-400">Custo Médio por Caixa</p>
-                    <p id="custoMedio" class="text-2xl md:text-3xl font-extrabold text-green-400 mt-1">R$ 0,00</p>
-                    <p class="text-xs text-gray-500 mt-1">Valor de **break-even** (zero prejuízo).</p>
-                </div>
-                
-                <!-- Preço de Venda Sugerido -->
-                <div class="p-4 bg-gray-900 rounded-lg border border-green-700 shadow-md">
-                    <p class="text-sm font-medium text-gray-400">Preço de Venda Sugerido</p>
-                    <p id="precoSugerido" class="text-2xl md:text-3xl font-extrabold text-indigo-400 mt-1">R$ 0,00</p>
-                    <p class="text-xs text-gray-500 mt-1">Com margem de lucro de <span id="margemExibida" class="font-bold">20</span>%.</p>
-                </div>
-                
-                <!-- Lucro Total Estimado -->
-                <div class="p-4 bg-gray-900 rounded-lg border border-green-700 shadow-md">
-                    <p class="text-sm font-medium text-gray-400">Lucro Total Estimado</p>
-                    <p id="lucroEstimado" class="text-2xl md:text-3xl font-extrabold text-yellow-400 mt-1">R$ 0,00</p>
-                    <p class="text-xs text-gray-500 mt-1">Se todas as caixas forem vendidas.</p>
-                </div>
-
-                <!-- Valor Total Estimado de Venda (Faturamento) -->
-                <div class="p-4 bg-gray-900 rounded-lg border border-green-700 shadow-md">
-                    <p class="text-sm font-medium text-gray-400">Valor Total Estimado de Venda</p>
-                    <p id="valorTotalVendido" class="text-2xl md:text-3xl font-extrabold text-blue-400 mt-1">R$ 0,00</p>
-                    <p class="text-xs text-gray-500 mt-1">Receita total da venda das <span id="caixasExibidas" class="font-bold">100</span> caixas.</p>
-                </div>
-
-            </div>
-        </div>
-        
-        <!-- O antigo rodapé de alerta foi removido daqui. -->
-        
         <!-- Rodapé de Autoria -->
         <footer class="mt-12">
             <p class="text-center text-sm text-gray-500">Desenvolvido por Ranieu Sousa</p>
@@ -132,9 +341,22 @@
     </div>
 
     <script>
+        // --- CONTROLE DAS ABAS ---
+        const tabs = document.querySelectorAll('.tab-content');
+        const tabButtons = document.querySelectorAll('.tab-button');
+
+        function changeTab(tabIndex) {
+            tabs.forEach(tab => tab.classList.remove('active'));
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+
+            document.getElementById(`tab-content-${tabIndex}`).classList.add('active');
+            document.getElementById(`tab-btn-${tabIndex}`).classList.add('active');
+        }
+
+        // --- LÓGICA DA ABA 1 (Calculadora Rápida) ---
+
         // Função para formatar números para a moeda BRL (R$)
         const formatarMoeda = (valor) => {
-            // Garante que o valor é um número finito, senão retorna 0
             if (!isFinite(valor) || isNaN(valor)) {
                 valor = 0;
             }
@@ -167,7 +389,6 @@
             // 5. Calcular Lucro Total Estimado
             const lucroEstimado = valorTotalVendido - custoTotalInventario;
 
-
             // 6. Exibir Resultados
             document.getElementById('custoMedio').textContent = formatarMoeda(custoMedioCaixa);
             document.getElementById('precoSugerido').textContent = formatarMoeda(precoVendaSugerido);
@@ -178,9 +399,217 @@
             document.getElementById('margemExibida').textContent = margemLucro.toFixed(0);
             document.getElementById('caixasExibidas').textContent = numCaixas.toFixed(0);
         };
+        
+        // --- LÓGICA DA ABA 2 (Gestor de Inventário) ---
+        
+        // Estado para armazenar os produtos
+        let inventario = [];
+        let proximoId = 0;
 
-        // Inicializar a aplicação ao carregar a página
-        window.onload = calcularTotal;
+        function adicionarProduto() {
+            const id = proximoId++;
+            const produto = {
+                id: id,
+                nome: 'Novo Produto',
+                quantidade: 1,
+                valorUnitario: 10.00
+            };
+            inventario.push(produto);
+            renderizarInventario();
+            calcularInventario();
+        }
+
+        function removerProduto(id) {
+            inventario = inventario.filter(p => p.id !== id);
+            renderizarInventario();
+            calcularInventario();
+        }
+
+        function atualizarProduto(id, campo, valor) {
+            const produto = inventario.find(p => p.id === id);
+            if (!produto) return;
+
+            if (campo === 'nome') {
+                produto.nome = valor;
+            } else {
+                produto[campo] = parseFloat(valor) || 0;
+            }
+            
+            // Recalcula o total da linha e o total geral
+            calcularInventario();
+        }
+        
+        function calcularInventario() {
+            let custoTotal = 0;
+            const tbody = document.getElementById('inventory-list');
+            
+            // Itera pelas linhas da tabela (elementos DOM) para atualizar totais
+            tbody.querySelectorAll('tr').forEach(row => {
+                const id = parseInt(row.dataset.id);
+                const produto = inventario.find(p => p.id === id);
+                
+                if (produto) {
+                    const totalLinha = produto.quantidade * produto.valorUnitario;
+                    custoTotal += totalLinha;
+                    // Atualiza o campo "Valor Total" da linha específica
+                    const totalEl = row.querySelector('.total-linha');
+                    if (totalEl) {
+                        totalEl.textContent = formatarMoeda(totalLinha);
+                    }
+                }
+            });
+
+            // Atualiza o Resumo do Inventário
+            document.getElementById('inventario-custo-total').textContent = formatarMoeda(custoTotal);
+        }
+
+        function renderizarInventario() {
+            const tbody = document.getElementById('inventory-list');
+            tbody.innerHTML = ''; // Limpa a tabela
+            
+            inventario.forEach(produto => {
+                const tr = document.createElement('tr');
+                tr.dataset.id = produto.id;
+                
+                tr.innerHTML = `
+                    <td>
+                        <input type="text" value="${produto.nome}" oninput="atualizarProduto(${produto.id}, 'nome', this.value)">
+                    </td>
+                    <td>
+                        <input type="number" value="${produto.quantidade}" min="0" oninput="atualizarProduto(${produto.id}, 'quantidade', this.value)">
+                    </td>
+                    <td>
+                        <input type="number" value="${produto.valorUnitario.toFixed(2)}" min="0" step="0.01" oninput="atualizarProduto(${produto.id}, 'valorUnitario', this.value)">
+                    </td>
+                    <td class="total-linha font-semibold text-white">
+                        ${formatarMoeda(produto.quantidade * produto.valorUnitario)}
+                    </td>
+                    <td>
+                        <button onclick="removerProduto(${produto.id})" class="text-red-400 hover:text-red-600 font-bold">X</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+        
+        function gerarDistribuicao() {
+            // CORREÇÃO: A linha abaixo estava buscando por 'numCaixasDistribuicao', que não existe mais.
+            // Corrigido para buscar 'numCaixas' (da Aba 1).
+            const numCaixas = parseFloat(document.getElementById('numCaixas').value) || 0;
+            
+            // CORREÇÃO: Removido o 'if' duplicado que checava numCaixas e inventario.
+            // Os checks corretos já existem logo abaixo.
+            
+            const resultadoContainer = document.getElementById('distribuicao-resultado');
+            const listaProdutosEl = document.getElementById('dist-lista-produtos');
+            
+            document.getElementById('dist-num-caixas').textContent = numCaixas;
+            listaProdutosEl.innerHTML = ''; // Limpa resultados anteriores
+            
+            if (numCaixas === 0) {
+                 alert("Por favor, defina um Número de Caixas maior que zero na Aba 1 (Calculadora Rápida).");
+                 return;
+            }
+            if (inventario.length === 0) {
+                alert("Por favor, adicione produtos ao inventário.");
+                return;
+            }
+            
+            inventario.forEach(produto => {
+                // NOVA LÓGICA (Baseado em inteiros e resto)
+                const quantidadeBase = Math.floor(produto.quantidade / numCaixas);
+                const resto = produto.quantidade % numCaixas;
+                
+                const li = document.createElement('li');
+                let texto = `<strong>${produto.nome}</strong> (Total: ${produto.quantidade} un.): `;
+                
+                if (quantidadeBase > 0) {
+                    texto += `Pelo menos <strong>${quantidadeBase}</strong> unidade(s) em todas as <strong>${numCaixas}</strong> caixas. `;
+                } else {
+                    texto += `Não é suficiente para 1 unidade em todas as caixas. `;
+                }
+                
+                if (resto > 0) {
+                    // Se a base for 0, só mostramos as unidades extras
+                    if (quantidadeBase === 0) {
+                        texto += `Total de <strong>${resto}</strong> unidade(s) para distribuir entre as <strong>${numCaixas}</strong> caixas.`
+                    } else {
+                         texto += `+ <strong>${resto}</strong> unidade(s) extras para distribuir.`;
+                    }
+                }
+                
+                li.innerHTML = texto;
+                listaProdutosEl.appendChild(li);
+            });
+            
+            resultadoContainer.classList.remove('hidden');
+        }
+
+        // --- FUNÇÕES DE SINCRONIZAÇÃO ---
+        
+        function sincronizarCusto() {
+            let custoTotal = 0;
+            inventario.forEach(p => {
+                custoTotal += p.quantidade * p.valorUnitario;
+            });
+            
+            document.getElementById('custoTotalInventario').value = custoTotal.toFixed(2);
+            // Avisa o usuário e muda para a aba 1
+            alert("Custo total do inventário (R$ " + custoTotal.toFixed(2) + ") foi enviado para a Calculadora Rápida!");
+            changeTab(1);
+            // Recalcula a aba 1 com o novo valor
+            calcularTotal();
+        }
+        
+        function syncCaixas(valor) {
+            // Sincroniza o valor do input da Aba 1 com o display da Aba 2
+            document.getElementById('numCaixas').value = valor;
+            
+            // Atualiza o display na aba 2, se ele existir
+            const distNumCaixasEl = document.getElementById('dist-num-caixas');
+            if(distNumCaixasEl) {
+                distNumCaixasEl.textContent = valor;
+            }
+
+            // Recalcula a aba 1
+            calcularTotal();
+        }
+
+        // --- LÓGICA DA ABA 3 (Precificar Produto) ---
+
+        const calcularPrecoVenda = () => {
+            // 1. Obter Entradas
+            const custoProduto = parseFloat(document.getElementById('custoProduto').value) || 0;
+            const custoFrete = parseFloat(document.getElementById('custoFrete').value) || 0;
+            const custoImpostos = parseFloat(document.getElementById('custoImpostos').value) || 0;
+            const margemLucroProduto = parseFloat(document.getElementById('margemLucroProduto').value) || 0;
+
+            // 2. Calcular Custo Total
+            const custoTotal = custoProduto + custoFrete + custoImpostos;
+
+            // 3. Calcular Preço de Venda (Baseado em Margem, não Markup)
+            // PrecoVenda = CustoTotal / (1 - (Margem % / 100))
+            let precoVenda = custoTotal; // Valor padrão caso a margem seja 100% ou mais
+            if (margemLucroProduto < 100) {
+                precoVenda = custoTotal / (1 - (margemLucroProduto / 100));
+            }
+            
+            // 4. Calcular Lucro em R$
+            const valorLucro = precoVenda - custoTotal;
+
+            // 5. Exibir Resultados
+            document.getElementById('resultadoCustoTotal').textContent = formatarMoeda(custoTotal);
+            document.getElementById('resultadoValorLucro').textContent = formatarMoeda(valorLucro);
+            document.getElementById('resultadoPrecoVenda').textContent = formatarMoeda(precoVenda);
+        };
+
+
+        // Inicializar a aplicação
+        window.onload = () => {
+            calcularTotal();
+            adicionarProduto(); // Adiciona uma linha de exemplo inicial
+            calcularPrecoVenda(); // Calcula a aba de precificação inicial
+        };
 
     </script>
 </body>
